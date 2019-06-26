@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+    stages {
+        stage('build with unit test, package and store the jar') {
+            steps {
+            	echo 'Building app...'
+                sh 'mvn -U -f Task-management-system clean install -Dintegration-tests.skip=true'
+            }
+        }
+        
+        stage('deploy app') {
+            steps {
+            	echo 'Deploying app...'            	
+				sh 'ls -l Task-management-system/system-integration/target/classes/system-server-0.0.1-SNAPSHOT.jar'
+                sh 'nohup java -jar Task-management-system/system-integration/target/classes/*.jar &'			                               
+            }
+        }
+        
+        stage('run integration tests') {
+            steps {
+            	echo 'Running integration tests...'
+            	sh 'mvn -f Task-management-system -Pintegration clean verify -DskipUTs'
+            }
+        }
+    }
+}
